@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F4F4F9">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Pelacak GPS Regu"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#D35400"
+            android:layout_marginBottom="24dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutDaftar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Masukkan kode regu dari pembina:"
+                android:textSize="14sp"
+                android:textColor="#7F8C8D"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/inputKode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Contoh: ELANG01"
+                android:inputType="textCapCharacters"
+                android:maxLength="20"
+                android:padding="16dp"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:background="@android:drawable/editbox_background"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btnMasuk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Masuk"
+                android:backgroundTint="#D35400"
+                android:textColor="#FFFFFF"
+                android:padding="14dp" />
+
+            <TextView
+                android:id="@+id/pesanError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#C62828"
+                android:textSize="13sp"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutKonfirmasi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Regu Anda:"
+                android:textSize="13sp"
+                android:textColor="#7F8C8D" />
+
+            <TextView
+                android:id="@+id/namaReguPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="#D35400"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/pembinaPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#7F8C8D"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="24dp" />
+
+            <Button
+                android:id="@+id/btnKonfirmasi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ya, Mulai Tracking"
+                android:backgroundTint="#27AE60"
+                android:textColor="#FFFFFF"
+                android:padding="14dp" />
+
+            <Button
+                android:id="@+id/btnBatal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Batal"
+                android:backgroundTint="#95A5A6"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutTracker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/namaRegu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="#2C3E50"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="✅ GPS AKTIF - JANGAN TUTUP APLIKASI"
+                android:background="#E8F5E9"
+                android:textColor="#2E7D32"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="14dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aplikasi terus mengirim GPS meski HP dikunci atau Anda membuka aplikasi lain. Notifikasi di status bar harus tetap muncul."
+                android:textSize="12sp"
+                android:textColor="#7F8C8D"
+                android:gravity="center"
+                android:layout_marginBottom="20dp" />
+
+            <Button
+                android:id="@+id/btnSos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🚨 TOMBOL DARURAT (SOS)"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="16dp"
+                android:backgroundTint="#D32F2F"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnKeluar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Keluar dari Regu"
+                android:backgroundTint="#95A5A6"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

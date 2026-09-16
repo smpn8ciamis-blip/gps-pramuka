@@ -1,0 +1,1 @@
+-keep class id.sch.smpn8ciamis.gpspramuka.** { *; }
