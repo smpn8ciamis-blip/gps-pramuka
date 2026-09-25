@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prosesDaftar() {
-        val kode = binding.inputKode.text.toString().trim().uppercase()
+        val kode = binding.inputKode.text?.toString().trim().uppercase()
         if (!Regex("^[A-Z0-9_-]{3,20}$").matches(kode)) {
             binding.pesanError.text = "Kode tidak valid. Gunakan 3-20 karakter (A-Z, 0-9, _, -)."
             return
@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun batalKonfirmasi() {
         pendingRegu = null
-        binding.inputKode.text.clear()
+        binding.inputKode.text?.clear()
         tampilkanForm()
     }
 
@@ -260,14 +260,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun kirimChat() {
-        val pesan = binding.inputChat.text.toString().trim()
+        val pesan = binding.inputChat.text?.toString().trim()
         if (pesan.isEmpty()) { toast("Pesan kosong"); return }
         val kode = Prefs.getKode(this) ?: return
         binding.btnKirimChat.isEnabled = false
         lifecycleScope.launch {
             val ok = withContext(Dispatchers.IO) { ApiClient.kirimChat(kode, pesan) }
             binding.btnKirimChat.isEnabled = true
-            if (ok) { binding.inputChat.text.clear(); toast("✅ Terkirim") }
+            if (ok) { binding.inputChat.text?.clear(); toast("✅ Terkirim") }
             else toast("❌ Gagal")
         }
     }
@@ -305,7 +305,7 @@ class MainActivity : AppCompatActivity() {
                 Prefs.hapus(this@MainActivity)
                 toast("Kode benar. Aplikasi ditutup.")
                 tampilkanForm()
-                binding.inputKode.text.clear()
+                binding.inputKode.text?.clear()
                 finishAffinity()
             } else {
                 toast("❌ ${result.pesan}")
