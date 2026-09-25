@@ -25,8 +25,8 @@ class GpsService : Service() {
         private const val NOTIF_BROADCAST_ID = 2001
         const val ACTION_STOP = "id.sch.smpn8ciamis.gpspramuka.STOP"
         const val ACTION_SOS = "id.sch.smpn8ciamis.gpspramuka.SOS"
-        private const val KIRIM_INTERVAL_MS = 5000L
-        private const val MIN_JARAK_METER = 3f
+        private const val KIRIM_INTERVAL_MS = 15_000L
+        private const val MIN_JARAK_METER = 10f
         private const val NOTIF_UPDATE_INTERVAL_MS = 30_000L
         private const val BROADCAST_POLL_INTERVAL_MS = 30_000L
     }
