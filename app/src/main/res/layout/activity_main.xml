@@ -1,189 +1,384 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="#F5F7FA">
+    android:background="@color/bg_light">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        app:elevation="4dp">
 
-        <!-- HEADER -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="GPS Pramuka"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#2C3E50"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:title="@string/app_name"
+            app:titleTextColor="@color/on_primary" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SMPN 8 Ciamis"
-            android:textSize="14sp"
-            android:textColor="#7F8C8D"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- ===== LAYOUT DAFTAR ===== -->
         <LinearLayout
-            android:id="@+id/layoutDaftar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="visible">
+            android:padding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Masukkan Kode Regu"
-                android:textSize="16sp"
-                android:textColor="#34495E"
-                android:layout_marginBottom="8dp" />
-
-            <EditText
-                android:id="@+id/inputKode"
+            <LinearLayout
+                android:id="@+id/layoutDaftar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Contoh: REGU01"
-                android:inputType="textCapCharacters"
-                android:maxLength="20"
-                android:padding="16dp"
-                android:background="@android:drawable/editbox_background"
-                android:layout_marginBottom="8dp" />
+                android:orientation="vertical"
+                android:visibility="visible">
 
-            <TextView
-                android:id="@+id/pesanError"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/card_white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/login_title"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:gravity="center"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/app_subtitle"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary"
+                            android:gravity="center"
+                            android:layout_marginBottom="24dp" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/login_hint"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_marginBottom="16dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/inputKode"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textCapCharacters"
+                                android:maxLength="20"
+                                android:textSize="18sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:id="@+id/pesanError"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/error"
+                            android:textSize="13sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMasuk"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:text="@string/login_button"
+                            android:textSize="16sp"
+                            app:cornerRadius="12dp"
+                            android:backgroundTint="@color/primary"
+                            android:textColor="@color/on_primary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutKonfirmasi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#E74C3C"
-                android:textSize="13sp"
-                android:layout_marginBottom="16dp" />
+                android:orientation="vertical"
+                android:visibility="gone">
 
-            <Button
-                android:id="@+id/btnMasuk"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/card_white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Konfirmasi Regu"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginBottom="16dp" />
+
+                        <TextView
+                            android:id="@+id/namaReguPreview"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/primary"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/pembinaPreview"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary"
+                            android:layout_marginBottom="24dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnKonfirmasi"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:text="✅ Mulai Tracking"
+                            android:textSize="16sp"
+                            app:cornerRadius="12dp"
+                            android:backgroundTint="@color/success_green"
+                            android:textColor="@color/on_primary"
+                            android:layout_marginBottom="8dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnBatal"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:text="@string/exit_dialog_cancel"
+                            android:textSize="16sp"
+                            app:cornerRadius="12dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutTracker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Masuk"
-                android:textSize="16sp"
-                android:padding="16dp"
-                android:backgroundTint="#4A6741"
-                android:textColor="#FFFFFF" />
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/card_white"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tracker_title"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:id="@+id/namaRegu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginTop="4dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="12dp">
+
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:background="@drawable/bg_dot_green" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/tracker_active"
+                                android:textSize="14sp"
+                                android:textColor="@color/success_green"
+                                android:layout_marginStart="8dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabMode="fixed"
+                    app:tabGravity="fill"
+                    app:tabIndicatorColor="@color/primary"
+                    app:tabSelectedTextColor="@color/primary"
+                    android:layout_marginBottom="8dp">
+
+                    <com.google.android.material.tabs.TabItem
+                        android:text="📢 Pesan"
+                        android:layout_width="wrap_content" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:text="💬 Chat"
+                        android:layout_width="wrap_content" />
+                </com.google.android.material.tabs.TabLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardBroadcast"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/card_white"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/broadcast_title"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginBottom="12dp" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvBroadcast"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false" />
+
+                        <TextView
+                            android:id="@+id/tvBroadcastEmpty"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/broadcast_empty"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary"
+                            android:gravity="center"
+                            android:padding="16dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardChat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/card_white"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/chat_title"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginBottom="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <EditText
+                                android:id="@+id/inputChat"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/chat_hint"
+                                android:padding="12dp"
+                                android:background="@drawable/bg_input"
+                                android:maxLines="3" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnKirimChat"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/chat_send"
+                                android:layout_marginStart="8dp" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvChat"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            android:layout_marginTop="12dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSos"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:text="@string/sos_button"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp"
+                    android:backgroundTint="@color/sos_red"
+                    android:textColor="@color/on_primary"
+                    android:layout_marginBottom="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnKeluar"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="@string/exit_button"
+                    android:textSize="16sp"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+
         </LinearLayout>
-
-        <!-- ===== LAYOUT KONFIRMASI ===== -->
-        <LinearLayout
-            android:id="@+id/layoutKonfirmasi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:background="#FFFFFF"
-            android:padding="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Konfirmasi Regu"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#2C3E50"
-                android:layout_marginBottom="12dp" />
-
-            <TextView
-                android:id="@+id/namaReguPreview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#4A6741"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/pembinaPreview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="#7F8C8D"
-                android:layout_marginBottom="20dp" />
-
-            <Button
-                android:id="@+id/btnKonfirmasi"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="✅ Mulai Tracking"
-                android:backgroundTint="#27AE60"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="8dp" />
-
-            <Button
-                android:id="@+id/btnBatal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Batal"
-                android:backgroundTint="#95A5A6"
-                android:textColor="#FFFFFF" />
-        </LinearLayout>
-
-        <!-- ===== LAYOUT TRACKER ===== -->
-        <LinearLayout
-            android:id="@+id/layoutTracker"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Regu Aktif"
-                android:textSize="14sp"
-                android:textColor="#7F8C8D" />
-
-            <TextView
-                android:id="@+id/namaRegu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#2C3E50"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🟢 GPS aktif melacak lokasi Anda"
-                android:textSize="14sp"
-                android:textColor="#27AE60"
-                android:layout_marginBottom="24dp" />
-
-            <Button
-                android:id="@+id/btnSos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🚨 KIRIM SOS"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:padding="20dp"
-                android:backgroundTint="#E74C3C"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnKeluar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🔒 Keluar (butuh kode admin)"
-                android:backgroundTint="#95A5A6"
-                android:textColor="#FFFFFF" />
-        </LinearLayout>
-
-    </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
