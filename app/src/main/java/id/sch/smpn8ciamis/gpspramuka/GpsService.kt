@@ -3,6 +3,7 @@ package id.sch.smpn8ciamis.gpspramuka
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -12,24 +13,31 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
+import org.json.JSONObject
 
 class GpsService : Service() {
 
     companion object {
         private const val TAG = "GpsService"
         private const val CHANNEL_ID = "gps_tracker_channel"
+        private const val CHANNEL_BROADCAST_ID = "broadcast_channel"
         private const val NOTIF_ID = 1001
+        private const val NOTIF_BROADCAST_ID = 2001
         const val ACTION_STOP = "id.sch.smpn8ciamis.gpspramuka.STOP"
         const val ACTION_SOS = "id.sch.smpn8ciamis.gpspramuka.SOS"
         private const val KIRIM_INTERVAL_MS = 5000L
         private const val MIN_JARAK_METER = 3f
+        private const val NOTIF_UPDATE_INTERVAL_MS = 30_000L
+        private const val BROADCAST_POLL_INTERVAL_MS = 30_000L
     }
 
     private lateinit var locationManager: LocationManager
     private var lastSentTime = 0L
+    private var lastNotifUpdate = 0L
     private var lastUpdate = ""
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var broadcastJob: Job? = null
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
@@ -43,7 +51,12 @@ class GpsService : Service() {
                 kirimKeServer(location)
                 lastSentTime = now
             }
-            updateNotification(location)
+
+            // Throttle update notifikasi
+            if (now - lastNotifUpdate >= NOTIF_UPDATE_INTERVAL_MS) {
+                lastNotifUpdate = now
+                updateNotification(location)
+            }
         }
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
@@ -51,7 +64,10 @@ class GpsService : Service() {
     }
 
     private fun kirimKeServer(location: Location) {
-        val kode = Prefs.getKode(this) ?: return
+        val kode = Prefs.getKode(this) ?: run {
+            Log.w(TAG, "kirimKeServer: kode regu null, skip")
+            return
+        }
         scope.launch {
             ApiClient.kirimLokasi(
                 kodeRegu = kode,
@@ -66,7 +82,7 @@ class GpsService : Service() {
     override fun onCreate() {
         super.onCreate()
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        createNotificationChannel()
+        createNotificationChannels()
         Prefs.setServiceActive(this, true)
     }
 
@@ -82,8 +98,20 @@ class GpsService : Service() {
                 return START_STICKY
             }
         }
-        startForeground(NOTIF_ID, buildNotification("Memulai GPS...", "Menunggu sinyal"))
+
+        val notification = buildNotification("Memulai GPS...", "Menunggu sinyal")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                NOTIF_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+            )
+        } else {
+            startForeground(NOTIF_ID, notification)
+        }
+
         startTracking()
+        startBroadcastPolling()
         return START_STICKY
     }
 
@@ -103,6 +131,7 @@ class GpsService : Service() {
             }
             val lastKnown = try {
                 locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             } catch (e: SecurityException) { null }
             if (lastKnown != null) locationListener.onLocationChanged(lastKnown)
         } catch (e: SecurityException) {
@@ -111,25 +140,100 @@ class GpsService : Service() {
         }
     }
 
+    // ===== BROADCAST POLLING (FITUR 2) =====
+    private fun startBroadcastPolling() {
+        broadcastJob?.cancel()
+        broadcastJob = scope.launch {
+            while (isActive) {
+                try {
+                    cekBroadcast()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Broadcast polling error: ${e.message}")
+                }
+                delay(BROADCAST_POLL_INTERVAL_MS)
+            }
+        }
+    }
+
+    private suspend fun cekBroadcast() {
+        val kode = Prefs.getKode(this) ?: return
+        val lastId = Prefs.getLastBroadcastId(this)
+
+        val result = ApiClient.ambilBroadcast(kode, lastId)
+        if (!result.ok || result.broadcasts.isEmpty()) return
+
+        result.broadcasts.forEach { bc ->
+            tampilkanBroadcast(bc)
+            Prefs.setLastBroadcastId(this, bc.id)
+        }
+    }
+
+    private fun tampilkanBroadcast(bc: ApiClient.BroadcastInfo) {
+        val isDarurat = bc.prioritas == "DARURAT"
+        val judul = if (isDarurat) "🚨 BROADCAST DARURAT" else "📢 Broadcast dari Pos Utama"
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pi = PendingIntent.getActivity(
+            this, bc.id.toInt(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notif = NotificationCompat.Builder(this, CHANNEL_BROADCAST_ID)
+            .setContentTitle(judul)
+            .setContentText(bc.pesan)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(bc.pesan))
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(pi)
+            .setAutoCancel(true)
+            .setPriority(if (isDarurat) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        getSystemService(NotificationManager::class.java)
+            .notify(NOTIF_BROADCAST_ID + bc.id.toInt(), notif)
+
+        Log.d(TAG, "Broadcast diterima: ${bc.pesan}")
+    }
+
     private fun kirimSos() {
-        try {
-            val lastKnown = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: return
-            val kode = Prefs.getKode(this) ?: return
-            scope.launch {
+        val kode = Prefs.getKode(this) ?: run {
+            Log.e(TAG, "SOS gagal: kode regu null")
+            return
+        }
+
+        val lastKnown = try {
+            locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SOS security: ${e.message}")
+            null
+        }
+
+        scope.launch {
+            if (lastKnown == null) {
+                Log.w(TAG, "SOS tanpa koordinat (GPS belum lock)")
+                ApiClient.kirimLokasi(kode, 0.0, 0.0, 0f, "DARURAT_SOS")
+            } else {
                 ApiClient.kirimLokasi(
-                    kodeRegu = kode,
-                    lat = lastKnown.latitude,
-                    lng = lastKnown.longitude,
-                    akurasi = lastKnown.accuracy,
-                    status = "DARURAT_SOS"
+                    kode, lastKnown.latitude, lastKnown.longitude,
+                    lastKnown.accuracy, "DARURAT_SOS"
                 )
             }
-        } catch (_: Exception) {}
+        }
     }
 
     private fun stopTracking() {
         try { locationManager.removeUpdates(locationListener) } catch (_: Exception) {}
         Prefs.setServiceActive(this, false)
+        broadcastJob?.cancel()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
     }
 
     override fun onDestroy() {
@@ -140,12 +244,19 @@ class GpsService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun createNotificationChannel() {
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
+            val nm = getSystemService(NotificationManager::class.java)
+
+            val channel1 = NotificationChannel(
                 CHANNEL_ID, "Pelacak GPS Pramuka", NotificationManager.IMPORTANCE_LOW
             ).apply { setShowBadge(false) }
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+            nm.createNotificationChannel(channel1)
+
+            val channel2 = NotificationChannel(
+                CHANNEL_BROADCAST_ID, "Broadcast dari Pos Utama", NotificationManager.IMPORTANCE_HIGH
+            ).apply { setShowBadge(true) }
+            nm.createNotificationChannel(channel2)
         }
     }
 
@@ -176,7 +287,7 @@ class GpsService : Service() {
         val akurasi = location.accuracy.toInt()
         getSystemService(NotificationManager::class.java).notify(
             NOTIF_ID,
-            buildNotification("Regu $nama", "Lokasi terkirim • akurasi ${akurasi}m • $lastUpdate")
+            buildNotification("Regu $nama", "Akurasi ${akurasi}m • $lastUpdate")
         )
     }
 }
