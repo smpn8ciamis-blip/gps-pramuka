@@ -6,40 +6,26 @@ plugins {
 android {
     namespace = "id.sch.smpn8ciamis.gpspramuka"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "id.sch.smpn8ciamis.gpspramuka"
         minSdk = 24
         targetSdk = 34
         versionCode = 2
         versionName = "2.0"
-
         buildConfigField("String", "SERVER_URL", "\"https://pramuka.smpn8ciamis.sch.id\"")
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    buildFeatures {
-        buildConfig = true
-        viewBinding = true
-    }
+    kotlinOptions { jvmTarget = "17" }
+    buildFeatures { buildConfig = true; viewBinding = true }
 }
 
 dependencies {

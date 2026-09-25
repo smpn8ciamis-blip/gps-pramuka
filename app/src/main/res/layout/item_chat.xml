@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="6dp">
+    <TextView
+        android:id="@+id/tvDari"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary" />
+    <TextView
+        android:id="@+id/tvPesan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/text_primary"
+        android:padding="10dp"
+        android:background="@drawable/bg_chat_bubble"
+        android:layout_marginTop="4dp" />
+    <TextView
+        android:id="@+id/tvWaktu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="2dp" />
+</LinearLayout>

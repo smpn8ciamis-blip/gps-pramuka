@@ -1,3 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPS Pramuka</string>
+    <string name="app_subtitle">SMPN 8 Ciamis</string>
+    <string name="login_title">Masuk Regu</string>
+    <string name="login_hint">Kode Regu</string>
+    <string name="login_button">Masuk</string>
+    <string name="tracker_title">Regu Anda</string>
+    <string name="tracker_active">GPS Aktif • Terpantau</string>
+    <string name="sos_button">KIRIM SOS</string>
+    <string name="exit_button">Keluar</string>
+    <string name="broadcast_title">Pesan dari Pos Utama</string>
+    <string name="broadcast_empty">Belum ada pesan</string>
+    <string name="chat_title">Pesan Regu</string>
+    <string name="chat_hint">Tulis pesan...</string>
+    <string name="chat_send">Kirim</string>
+    <string name="exit_dialog_title">🔒 Kode Keluar Diperlukan</string>
+    <string name="exit_dialog_msg">Aplikasi ini harus tetap berjalan agar regu Anda terpantau.\n\nMasukkan kode keluar dari admin untuk menutup aplikasi.</string>
+    <string name="exit_dialog_hint">Masukkan kode keluar</string>
+    <string name="exit_dialog_verify">Verifikasi</string>
+    <string name="exit_dialog_cancel">Batal</string>
 </resources>
