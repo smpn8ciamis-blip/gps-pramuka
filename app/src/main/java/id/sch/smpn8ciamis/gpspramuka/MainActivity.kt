@@ -153,8 +153,12 @@ class MainActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated")
     override fun onBackPressed() {
-        if (Prefs.getKode(this) != null) tampilkanDialogExitCode()
-        else { @Suppress("DEPRECATION"); super.onBackPressed() }
+        if (Prefs.getKode(this) != null) {
+            tampilkanDialogExitCode()
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
     }
 
     private fun tampilkanForm() {
