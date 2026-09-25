@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prosesDaftar() {
-        val kode = binding.inputKode.text?.toString().trim().uppercase()
+        val kode = binding.inputKode.text?.toString()?.trim()?.uppercase() ?: ""
         if (!Regex("^[A-Z0-9_-]{3,20}$").matches(kode)) {
             binding.pesanError.text = "Kode tidak valid. Gunakan 3-20 karakter (A-Z, 0-9, _, -)."
             return
@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun kirimChat() {
-        val pesan = binding.inputChat.text?.toString().trim()
+        val pesan = binding.inputChat.text?.toString()?.trim() ?: ""
         if (pesan.isEmpty()) { toast("Pesan kosong"); return }
         val kode = Prefs.getKode(this) ?: return
         binding.btnKirimChat.isEnabled = false
