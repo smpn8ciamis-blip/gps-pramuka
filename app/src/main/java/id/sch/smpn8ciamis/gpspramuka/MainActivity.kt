@@ -24,20 +24,24 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var pendingRegu: ApiClient.ReguInfo? = null
+    private var kodePending: String? = null
+    private var exitDialogShown = false
 
-    // Launcher izin lokasi
+    // ===== IZIN LOKASI =====
     private val mintaIzinLokasi = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { hasil ->
         val fineOk = hasil[Manifest.permission.ACCESS_FINE_LOCATION] == true
         if (fineOk) {
             cekDanMintaIzinBackground()
+            // Lanjutkan validasi jika ada kode pending
+            kodePending?.let { validasiKeServer(it) }
         } else {
             toast("Izin lokasi wajib untuk tracking.")
         }
     }
 
-    // Launcher izin notifikasi
+    // ===== IZIN NOTIFIKASI =====
     private val mintaIzinNotif = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { /* tidak masalah kalau ditolak */ }
@@ -47,7 +51,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Cek sesi tersimpan
         val kodeTersimpan = Prefs.getKode(this)
         val namaTersimpan = Prefs.getNama(this)
 
@@ -58,16 +61,26 @@ class MainActivity : AppCompatActivity() {
             tampilkanForm()
         }
 
-        // Setup listeners
         binding.btnMasuk.setOnClickListener { prosesDaftar() }
         binding.btnKonfirmasi.setOnClickListener { konfirmasiMulai() }
         binding.btnBatal.setOnClickListener { batalKonfirmasi() }
         binding.btnSos.setOnClickListener { kirimSos() }
         binding.btnKeluar.setOnClickListener { konfirmasiKeluar() }
 
-        // Minta izin notifikasi (Android 13+)
         if (Build.VERSION.SDK_INT >= 33) {
             mintaIzinNotif.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // ===== BACK PRESS: TOLAK KELUAR (FITUR 3) =====
+    @Deprecated("Deprecated")
+    override fun onBackPressed() {
+        if (Prefs.getKode(this) != null) {
+            // Aplikasi sedang tracking, tolak back
+            tampilkanDialogExitCode()
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
         }
     }
 
@@ -103,23 +116,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.pesanError.text = ""
-        binding.btnMasuk.isEnabled = false
-        binding.btnMasuk.text = "Memeriksa..."
 
-        // Pastikan izin lokasi
         if (!punyaIzinLokasi()) {
+            kodePending = kode
             mintaIzinLokasi.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             )
-            binding.btnMasuk.isEnabled = true
-            binding.btnMasuk.text = "Masuk"
             return
         }
 
-        // Validasi ke server
+        validasiKeServer(kode)
+    }
+
+    private fun validasiKeServer(kode: String) {
+        binding.btnMasuk.isEnabled = false
+        binding.btnMasuk.text = "Memeriksa..."
+
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 ApiClient.validasiRegu(kode)
@@ -127,10 +142,11 @@ class MainActivity : AppCompatActivity() {
 
             binding.btnMasuk.isEnabled = true
             binding.btnMasuk.text = "Masuk"
+            kodePending = null
 
             if (result.ok && result.regu != null) {
                 pendingRegu = result.regu
-                tampilkanKonfirmasi(result.regu.nama, null)
+                tampilkanKonfirmasi(result.regu.nama, result.regu.pembina)
             } else {
                 binding.pesanError.text = result.pesan
             }
@@ -154,13 +170,17 @@ class MainActivity : AppCompatActivity() {
 
     // ===== SERVICE =====
     private fun mulaiService() {
-        val intent = Intent(this, GpsService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        try {
+            val intent = Intent(this, GpsService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+            toast("GPS mulai melacak. Jangan tutup aplikasi.")
+        } catch (e: Exception) {
+            toast("Gagal memulai GPS: ${e.message}")
         }
-        toast("GPS mulai melacak. Jangan tutup aplikasi.")
     }
 
     // ===== SOS =====
@@ -169,29 +189,93 @@ class MainActivity : AppCompatActivity() {
             .setTitle("🚨 KONFIRMASI SOS")
             .setMessage("Kirim sinyal darurat ke Pos Utama?")
             .setPositiveButton("KIRIM") { _, _ ->
-                val intent = Intent(this, GpsService::class.java).apply {
-                    action = GpsService.ACTION_SOS
+                try {
+                    val intent = Intent(this, GpsService::class.java).apply {
+                        action = GpsService.ACTION_SOS
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent)
+                    } else {
+                        startService(intent)
+                    }
+                    toast("SOS terkirim. Tetap di posisi Anda.")
+                } catch (e: Exception) {
+                    toast("Gagal kirim SOS: ${e.message}")
                 }
-                startService(intent)
-                toast("SOS terkirim. Tetap di posisi Anda.")
             }
             .setNegativeButton("Batal", null)
             .show()
     }
 
-    // ===== KELUAR =====
+    // ===== KELUAR (FITUR 3) =====
     private fun konfirmasiKeluar() {
+        tampilkanDialogExitCode()
+    }
+
+    private fun tampilkanDialogExitCode() {
+        if (exitDialogShown) return
+        exitDialogShown = true
+
+        val input = android.widget.EditText(this).apply {
+            hint = "Masukkan kode keluar dari admin"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                    android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
+
         AlertDialog.Builder(this)
-            .setTitle("Keluar dari Regu")
-            .setMessage("Anda akan berhenti terpantau. Yakin?")
-            .setPositiveButton("Keluar") { _, _ ->
-                stopService(Intent(this, GpsService::class.java))
-                Prefs.hapus(this)
+            .setTitle("🔒 Kode Keluar Diperlukan")
+            .setMessage("Aplikasi ini harus tetap berjalan agar regu Anda terpantau.\n\nMasukkan kode keluar dari admin untuk menutup aplikasi.")
+            .setView(input)
+            .setPositiveButton("Verifikasi") { _, _ ->
+                val kode = input.text.toString().trim()
+                if (kode.isEmpty()) {
+                    toast("Kode tidak boleh kosong.")
+                    exitDialogShown = false
+                    return@setPositiveButton
+                }
+                verifikasiExitCode(kode)
+            }
+            .setNegativeButton("Batal") { _, _ ->
+                exitDialogShown = false
+            }
+            .setOnCancelListener {
+                exitDialogShown = false
+            }
+            .show()
+    }
+
+    private fun verifikasiExitCode(exitCode: String) {
+        val kodeRegu = Prefs.getKode(this) ?: return
+
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                ApiClient.verifyExitCode(kodeRegu, exitCode)
+            }
+
+            exitDialogShown = false
+
+            if (result.ok) {
+                // Stop service & logout
+                stopService(Intent(this@MainActivity, GpsService::class.java))
+                Prefs.hapus(this@MainActivity)
+                toast("Kode benar. Aplikasi ditutup.")
                 tampilkanForm()
                 binding.inputKode.text.clear()
+
+                // Keluar dari aplikasi
+                finishAffinity()
+            } else {
+                toast("❌ ${result.pesan}")
+                // Getar
+                val vibrator = getSystemService(VIBRATOR_SERVICE) as android.os.Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(android.os.VibrationEffect.createOneShot(500, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(500)
+                }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+        }
     }
 
     // ===== PERMISSIONS =====
@@ -216,7 +300,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ===== BATTERY OPTIMIZATION =====
     private fun mintaBypassBaterai() {
         val pm = getSystemService(POWER_SERVICE) as PowerManager
         if (!pm.isIgnoringBatteryOptimizations(packageName)) {
